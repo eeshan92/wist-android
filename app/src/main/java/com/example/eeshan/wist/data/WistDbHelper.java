@@ -18,11 +18,11 @@ public class WistDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String SQL_CREATE_PETS_TABLE =  "CREATE TABLE " + WistContract.PostEntry.TABLE_NAME + " ("
+        String SQL_CREATE_WIST_TABLE =  "CREATE TABLE " + WistContract.PostEntry.TABLE_NAME + " ("
                 + WistContract.PostEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + WistContract.PostEntry.COLUMN_NAME_BODY + " TEXT NOT NULL, "
                 + WistContract.PostEntry.COLUMN_NAME_USER_ID + " TEXT)";
-        db.execSQL(SQL_CREATE_PETS_TABLE);
+        db.execSQL(SQL_CREATE_WIST_TABLE);
     }
 
     @Override
