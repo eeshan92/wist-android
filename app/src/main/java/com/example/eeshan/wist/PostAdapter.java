@@ -33,8 +33,6 @@ public class PostAdapter extends ArrayAdapter<Post> {
         Post currentPost = getItem(position);
         assert currentPost != null;
 
-        Log.v("PostAdapter", "created postListView");
-
         TextView bodyTextView = (TextView) postListView.findViewById(R.id.body);
         TextView usernameTextView = (TextView) postListView.findViewById(R.id.username);
         TextView createdDateTextView = (TextView) postListView.findViewById(R.id.created_date);

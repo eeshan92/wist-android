@@ -51,20 +51,5 @@ public class MainActivity extends AppCompatActivity {
 
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.setAdapter(postsAdapter);
-
-//        displayDatabaseInfo();
-    }
-
-    private void displayDatabaseInfo() {
-        WistDbHelper mDbHelper = new WistDbHelper(this);
-
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
-        Cursor cursor = db.rawQuery("SELECT * FROM " + WistContract.PostEntry.TABLE_NAME, null);
-        try {
-            Log.v("displayDatabaseInfo", "Database has " + String.valueOf(cursor.getCount()) + " entries");
-        } finally {
-            cursor.close();
-        }
     }
 }

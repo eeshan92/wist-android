@@ -25,7 +25,7 @@
         android:layout_marginEnd="16dp" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/save_post_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="16dp"
