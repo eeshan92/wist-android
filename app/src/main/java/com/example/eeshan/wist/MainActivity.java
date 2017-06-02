@@ -32,24 +32,58 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        ArrayList<Post> posts = new ArrayList<Post>();
+        WistDbHelper mDbHelper = new WistDbHelper(this);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
-        posts.add(new Post("I saw a cat walking around on a purple line train", "David_sim"));
-        posts.add(new Post("I saw a dog running around on a circle line train", "rrrrwts"));
-        posts.add(new Post("I saw a fish swimming around on a green line train", "92skater"));
-        posts.add(new Post("I saw a monkey loose on a red line train", "test_user"));
-        posts.add(new Post("I saw a cat walking around on a purple line train", "David_sim"));
-        posts.add(new Post("I saw a dog running around on a circle line train", "rrrrwts"));
-        posts.add(new Post("I saw a fish swimming around on a green line train", "92skater"));
-        posts.add(new Post("I saw a monkey loose on a red line train", "test_user"));
-        posts.add(new Post("I saw a cat walking around on a purple line train", "David_sim"));
-        posts.add(new Post("I saw a dog running around on a circle line train", "rrrrwts"));
-        posts.add(new Post("I saw a fish swimming around on a green line train", "92skater"));
-        posts.add(new Post("I saw a monkey loose on a red line train", "test_user"));
+        Cursor cursor = fetchDbPosts(db);
 
-        PostAdapter postsAdapter = new PostAdapter(this, posts);
+        PostAdapter postsAdapter = updatePostsAdapter(cursor);
 
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.setAdapter(postsAdapter);
+    }
+
+    private PostAdapter updatePostsAdapter(Cursor cursor) {
+        ArrayList<Post> posts = new ArrayList<Post>();
+
+        while(cursor.moveToNext()) {
+//            String createdDate = cursor.getString(
+//                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_CREATED_DATE)
+//            );
+
+//            Log.v("Post: ", createdDate);
+            posts.add(
+                new Post(
+                    cursor.getString(
+                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
+                    ),
+                    cursor.getString(
+                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
+                    ),
+                    "5 mins ago"
+                )
+            );
+        }
+        cursor.close();
+
+        return new PostAdapter(this, posts);
+    }
+
+    private Cursor fetchDbPosts(SQLiteDatabase db) {
+        String[] projection = {
+                WistContract.PostEntry.COLUMN_NAME_BODY,
+                WistContract.PostEntry.COLUMN_NAME_USER_ID
+        };
+
+        String sortOrder = WistContract.PostEntry.COLUMN_NAME_CREATED_DATE + " DESC";
+
+        return db.query(
+            WistContract.PostEntry.TABLE_NAME,
+            projection,
+            null,
+            null,
+            null,
+            null,
+            sortOrder);
     }
 }

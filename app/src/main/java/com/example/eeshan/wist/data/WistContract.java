@@ -13,5 +13,6 @@ public final class WistContract {
         public static final String TABLE_NAME = "post";
         public static final String COLUMN_NAME_BODY = "body";
         public static final String COLUMN_NAME_USER_ID = "user_id";
+        public static final String COLUMN_NAME_CREATED_DATE = "created_date";
     }
 }

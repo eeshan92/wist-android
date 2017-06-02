@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Wist</string>
+    <string name="scoop">THE LATEST SCOOP</string>
+    <string name="post_button">SAY LEH</string>
+    <string name="save_button">POST</string>
 </resources>

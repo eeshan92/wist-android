@@ -3,6 +3,9 @@ package com.example.eeshan.wist.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import junit.runner.Version;
 
 /**
  * Created by eeshan on 15/5/17.
@@ -10,7 +13,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class WistDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Wist.db";
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     public WistDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -27,6 +30,11 @@ public class WistDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        Log.v("SQLite", "updating table from " + String.valueOf(oldVersion) + " to " + String.valueOf(newVersion));
+        if (oldVersion < 2) {
+            String SQL_UPDATE_WIST_TABLE = "ALTER TABLE " + WistContract.PostEntry.TABLE_NAME
+                    + " ADD COLUMN " + WistContract.PostEntry.COLUMN_NAME_CREATED_DATE + " INTEGER;";
+            db.execSQL(SQL_UPDATE_WIST_TABLE);
+        }
     }
 }

@@ -39,7 +39,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
 
         bodyTextView.setText(currentPost.getBody());
         usernameTextView.setText(currentPost.getUsername());
-        createdDateTextView.setText("5 mins ago");
+        createdDateTextView.setText("5 min ago");
 
         return postListView;
     }

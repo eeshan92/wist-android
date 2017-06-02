@@ -9,17 +9,18 @@ import java.text.DateFormat;
 public class Post {
     private String body;
     private String username;
-    private DateFormat createdDate;
+    private String createdDate;
 
-    public Post(String bodyText, String currentUsername) {
+    public Post(String bodyText, String currentUsername, String createdDate) {
         this.body = bodyText;
         this.username = currentUsername;
-        this.createdDate = DateFormat.getDateInstance();
+        this.createdDate = createdDate;
     }
 
     public String getBody() { return this.body; }
 
     public String getUsername() { return this.username; }
 
-    public DateFormat getCreatedDate() { return this.createdDate; }
+    public String getCreatedDate() { return this.createdDate; }
+
 }
