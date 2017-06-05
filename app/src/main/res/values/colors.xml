@@ -5,4 +5,6 @@
     <color name="colorAccent">#EE8A12</color>
     <color name="postScoopColor">#EE8A12</color>
     <color name="mainScoopColor">#EDBA10</color>
+    <color name="lightGray">#D6D9DA</color>
+    <color name="WISTRed">#E64C3B</color>
 </resources>

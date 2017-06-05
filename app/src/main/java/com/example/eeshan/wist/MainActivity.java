@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 //            );
 
 //            Log.v("Post: ", createdDate);
-            posts.add(
+            posts.add(0,
                 new Post(
                     cursor.getString(
                         cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                 WistContract.PostEntry.COLUMN_NAME_USER_ID
         };
 
-        String sortOrder = WistContract.PostEntry.COLUMN_NAME_CREATED_DATE + " DESC";
+//        String sortOrder = WistContract.PostEntry.COLUMN_NAME_CREATED_DATE + " DESC";
 
         return db.query(
             WistContract.PostEntry.TABLE_NAME,
@@ -84,6 +84,6 @@ public class MainActivity extends AppCompatActivity {
             null,
             null,
             null,
-            sortOrder);
+            null);
     }
 }
