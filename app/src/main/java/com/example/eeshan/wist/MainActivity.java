@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                         cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
                     ),
                     cursor.getString(
-                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
+                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_USER_ID)
                     ),
                     "5 mins ago"
                 )
