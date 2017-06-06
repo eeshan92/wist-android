@@ -44,7 +44,9 @@ public class PostAdapter extends ArrayAdapter<Post> {
         createdDateTextView.setText("5 min ago");
 
         if (position % 2 == 1) {
-            postListView.setBackgroundColor(Color.parseColor("#D6D9DA"));
+            postListView.setBackgroundColor(Color.parseColor("#E6E9EA"));
+        } else {
+            postListView.setBackgroundColor(Color.WHITE);
         }
 
         return postListView;

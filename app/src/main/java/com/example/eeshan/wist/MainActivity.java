@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
         PostAdapter postsAdapter = updatePostsAdapter(cursor);
 
+        HttpRequest jsonResponse = new HttpRequest(this, "GET", "/posts");
+
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.setAdapter(postsAdapter);
     }

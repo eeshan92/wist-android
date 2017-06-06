@@ -16,15 +16,7 @@ import android.widget.EditText;
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Calendar;
 
 import static java.util.Calendar.SECOND;
@@ -64,8 +56,7 @@ public class PostCreateActivity extends AppCompatActivity {
     }
 
     private void InsertPost(String body) throws IOException {
-        PostAsyncTask uploadPost = new PostAsyncTask();
-        uploadPost.execute();
+        HttpRequest request = new HttpRequest(this, "POST", "/posts");
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -86,83 +77,6 @@ public class PostCreateActivity extends AppCompatActivity {
             Log.v("displayDatabaseInfo", "Database has " + String.valueOf(cursor.getCount()) + " entries");
         } finally {
             cursor.close();
-        }
-    }
-
-    private class PostAsyncTask extends AsyncTask<Object, Object, Void> {
-
-        @Override
-        protected Void doInBackground(Object... urls) {
-            URL url = createUrl("https://powerful-castle-67767.herokuapp.com/api/v1/posts");
-
-            String jsonResponse = "";
-            try {
-                jsonResponse = makeHttpRequest(url);
-            } catch (IOException e) {
-                Log.e("IOException", e.toString());
-            }
-            return null;
-        }
-
-        private URL createUrl(String stringUrl) {
-            URL url = null;
-            try {
-                url = new URL(stringUrl);
-            } catch (MalformedURLException exception) {
-                Log.e("Error with creating URL", exception.toString());
-                return null;
-            }
-            return url;
-        }
-
-        private String makeHttpRequest(URL url) throws IOException {
-            String jsonResponse = "";
-            String payload = "{ \"body\": \"What I saw today!\" }";
-            HttpURLConnection urlConnection = null;
-            InputStream inputStream = null;
-            try {
-                urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
-                urlConnection.setRequestProperty("Content-Type","application/json");
-                urlConnection.setRequestProperty("Accept","application/json");
-                urlConnection.setRequestProperty("X-User-Email", "eeshansim@gmail.com");
-                urlConnection.setRequestProperty("X-User-Token", "jsjVj5pyxYVK3EyUmUrz");
-                urlConnection.setReadTimeout(10000);
-                urlConnection.setConnectTimeout(15000);
-                urlConnection.connect();
-
-                OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
-                writer.write(payload);
-                writer.close();
-
-                inputStream = urlConnection.getInputStream();
-                jsonResponse = readFromStream(inputStream);
-            } catch (IOException e) {
-                Log.e("IOException", e.toString());
-            } finally {
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
-                if (inputStream != null) {
-                    inputStream.close();
-                }
-            }
-            return jsonResponse;
-        }
-
-        private String readFromStream(InputStream inputStream) throws IOException {
-            StringBuilder output = new StringBuilder();
-            if (inputStream != null) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-8"));
-                BufferedReader reader = new BufferedReader(inputStreamReader);
-                String line = reader.readLine();
-                while (line != null) {
-                    output.append(line);
-                    line = reader.readLine();
-                }
-            }
-            return output.toString();
         }
     }
 }

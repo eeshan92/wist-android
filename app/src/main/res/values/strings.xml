@@ -3,4 +3,5 @@
     <string name="scoop">THE LATEST SCOOP</string>
     <string name="post_button">SAY LEH</string>
     <string name="save_button">POST</string>
+    <string name="base_url">https://powerful-castle-67767.herokuapp.com/api/v1</string>
 </resources>
