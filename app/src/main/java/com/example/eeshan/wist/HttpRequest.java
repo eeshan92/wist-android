@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +37,11 @@ public class HttpRequest {
 
         PostAsyncTask uploadPost = new PostAsyncTask();
         uploadPost.execute();
+    }
+
+    private JSONObject getJSONObject(String result) throws JSONException {
+        JSONObject json = new JSONObject(result);
+        return json;
     }
 
     private class PostAsyncTask extends AsyncTask<Object, Object, Void> {
