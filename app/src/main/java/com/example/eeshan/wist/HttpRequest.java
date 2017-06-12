@@ -28,6 +28,7 @@ public class HttpRequest {
     private String uri;
     private String body;
     private Context context;
+    private JSONObject response;
 
     public HttpRequest(Context activity, String verb, String uri) {
         this.verb = verb;
@@ -39,9 +40,12 @@ public class HttpRequest {
         uploadPost.execute();
     }
 
-    private JSONObject getJSONObject(String result) throws JSONException {
-        JSONObject json = new JSONObject(result);
-        return json;
+    private void parseJSONObject(String result) throws JSONException {
+        this.response = new JSONObject(result);
+    }
+
+    public JSONObject getJSONObject() {
+        return this.response;
     }
 
     private class PostAsyncTask extends AsyncTask<Object, Object, Void> {
@@ -61,6 +65,12 @@ public class HttpRequest {
                 jsonResponse = makeHttpRequest(url);
             } catch (IOException e) {
                 Log.e("IOException", e.toString());
+            }
+
+            try {
+                parseJSONObject(jsonResponse);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
             return null;
         }

@@ -23,6 +23,8 @@ import android.app.AlertDialog.Builder;
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
 
         PostAdapter postsAdapter = updatePostsAdapter(cursor);
 
-        HttpRequest jsonResponse = new HttpRequest(this, "GET", "/posts");
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts");
+        JSONObject JSONResponse = httpRequest.getJSONObject();
 
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.setAdapter(postsAdapter);
