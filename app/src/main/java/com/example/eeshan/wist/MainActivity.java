@@ -23,6 +23,8 @@ import android.app.AlertDialog.Builder;
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -58,10 +60,17 @@ public class MainActivity extends AppCompatActivity {
 
         Cursor cursor = fetchDbPosts(db);
 
-        PostAdapter postsAdapter = updatePostsAdapter(cursor);
+        PostAdapter postsAdapter = updatePostsAdapter(cursor); // Update to handle JSON Array
 
         HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts");
         JSONObject JSONResponse = httpRequest.getJSONObject();
+
+        try {
+            JSONArray postsResponse = JSONResponse.getJSONArray("posts");
+//            Post Adapter postsAdapter = populatePostsAdapter(postsResponse);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         ListView listView = (ListView) findViewById(R.id.post_list);
         listView.setAdapter(postsAdapter);
@@ -89,6 +98,22 @@ public class MainActivity extends AppCompatActivity {
             );
         }
         cursor.close();
+
+        return new PostAdapter(this, posts);
+    }
+
+    private PostAdapter populatePostsAdapter(JSONArray array) throws JSONException {
+        ArrayList<Post> posts = new ArrayList<Post>();
+
+        for (int i = 0; i <= array.length(); i++) {
+            posts.add(0,
+                    new Post(
+                            array.getJSONObject(i).getString("body"),
+                            array.getJSONObject(i).getString("username"),
+                            array.getJSONObject(i).getString("created_at")
+                    )
+            );
+        }
 
         return new PostAdapter(this, posts);
     }

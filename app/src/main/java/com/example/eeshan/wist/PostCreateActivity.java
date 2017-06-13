@@ -16,6 +16,9 @@ import android.widget.EditText;
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -56,7 +59,8 @@ public class PostCreateActivity extends AppCompatActivity {
     }
 
     private void InsertPost(String body) throws IOException {
-        HttpRequest request = new HttpRequest(this, "POST", "/posts");
+        HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts");
+        JSONObject JSONResponse = httpRequest.getJSONObject();
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
