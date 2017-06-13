@@ -30,28 +30,33 @@ public class HttpRequest {
     private Context context;
     private JSONObject response;
 
-    public HttpRequest(Context activity, String verb, String uri) {
+    public HttpRequest(Context activity, String verb, String uri, OnTaskCompleted listener) {
         this.verb = verb;
         this.uri = uri;
         this.body = "{ \"body\": \"What I saw today!\" }";
         this.context = activity;
 
-        PostAsyncTask uploadPost = new PostAsyncTask();
+        PostAsyncTask uploadPost = new PostAsyncTask(listener);
         uploadPost.execute();
     }
 
-    private void parseJSONObject(String result) throws JSONException {
-        this.response = new JSONObject(result);
+    private JSONObject parseJSONObject(String result) throws JSONException {
+        return new JSONObject(result);
     }
 
     public JSONObject getJSONObject() {
         return this.response;
     }
 
-    private class PostAsyncTask extends AsyncTask<Object, Object, Void> {
+    private class PostAsyncTask extends AsyncTask<Object, Object, JSONObject> {
+        private OnTaskCompleted listener;
+
+        public PostAsyncTask(OnTaskCompleted listener){
+            this.listener = listener;
+        }
 
         @Override
-        protected Void doInBackground(Object... urls) {
+        protected JSONObject doInBackground(Object... urls) {
             URL url = null;
             String domain = context.getString(R.string.base_url);
             try {
@@ -63,16 +68,23 @@ public class HttpRequest {
             String jsonResponse = "";
             try {
                 jsonResponse = makeHttpRequest(url);
+                Log.v("JSONResponse", jsonResponse);
             } catch (IOException e) {
                 Log.e("IOException", e.toString());
             }
 
+            JSONObject jsonObjectResponse = null;
             try {
-                parseJSONObject(jsonResponse);
+                jsonObjectResponse = parseJSONObject(jsonResponse);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-            return null;
+            return jsonObjectResponse;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject result) {
+            listener.onTaskCompleted(result);
         }
 
         private URL createUrl(String stringUrl) {
@@ -139,5 +151,3 @@ public class HttpRequest {
         }
     }
 }
-
-

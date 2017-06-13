@@ -21,6 +21,6 @@ public class Post {
 
     public String getUsername() { return this.username; }
 
-    public String getCreatedDate() { return this.createdDate; }
+    public String getCreatedDate() { return this.createdDate; } // Humanize this string
 
 }

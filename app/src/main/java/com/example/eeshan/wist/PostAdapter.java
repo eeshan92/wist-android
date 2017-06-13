@@ -41,7 +41,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
 
         bodyTextView.setText(currentPost.getBody());
         usernameTextView.setText(currentPost.getUsername());
-        createdDateTextView.setText("5 min ago");
+        createdDateTextView.setText(currentPost.getCreatedDate());
 
         if (position % 2 == 1) {
             postListView.setBackgroundColor(Color.parseColor("#E6E9EA"));

@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        final ListView listView = (ListView) findViewById(R.id.post_list);
+
         WistDbHelper mDbHelper = new WistDbHelper(this);
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
@@ -62,39 +64,43 @@ public class MainActivity extends AppCompatActivity {
 
         PostAdapter postsAdapter = updatePostsAdapter(cursor); // Update to handle JSON Array
 
-        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts");
-        JSONObject JSONResponse = httpRequest.getJSONObject();
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(JSONObject object) {
+                Log.v("JSON Response", "Task completed!");
 
-        try {
-            JSONArray postsResponse = JSONResponse.getJSONArray("posts");
-//            Post Adapter postsAdapter = populatePostsAdapter(postsResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        ListView listView = (ListView) findViewById(R.id.post_list);
-        listView.setAdapter(postsAdapter);
+                if (object != null) {
+                    try {
+                        JSONArray postsResponse = object.getJSONArray("posts");
+                        PostAdapter postsJSONAdapter = populatePostsAdapter(postsResponse);
+                        listView.setAdapter(postsJSONAdapter);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private PostAdapter updatePostsAdapter(Cursor cursor) {
         ArrayList<Post> posts = new ArrayList<Post>();
 
-        while(cursor.moveToNext()) {
+        while (cursor.moveToNext()) {
 //            String createdDate = cursor.getString(
 //                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_CREATED_DATE)
 //            );
 
 //            Log.v("Post: ", createdDate);
             posts.add(0,
-                new Post(
-                    cursor.getString(
-                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
-                    ),
-                    cursor.getString(
-                        cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_USER_ID)
-                    ),
-                    "5 mins ago"
-                )
+                    new Post(
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
+                            ),
+                            cursor.getString(
+                                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_USER_ID)
+                            ),
+                            "5 mins ago"
+                    )
             );
         }
         cursor.close();
@@ -105,11 +111,11 @@ public class MainActivity extends AppCompatActivity {
     private PostAdapter populatePostsAdapter(JSONArray array) throws JSONException {
         ArrayList<Post> posts = new ArrayList<Post>();
 
-        for (int i = 0; i <= array.length(); i++) {
-            posts.add(0,
+        for (int i = 0; i < array.length(); i++) {
+            posts.add(
                     new Post(
                             array.getJSONObject(i).getString("body"),
-                            array.getJSONObject(i).getString("username"),
+                            array.getJSONObject(i).getJSONObject("user").getString("username"),
                             array.getJSONObject(i).getString("created_at")
                     )
             );
@@ -125,13 +131,13 @@ public class MainActivity extends AppCompatActivity {
         };
 
         return db.query(
-            WistContract.PostEntry.TABLE_NAME,
-            projection,
-            null,
-            null,
-            null,
-            null,
-            null);
+                WistContract.PostEntry.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     private void showAlert(String alert) {
@@ -177,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
-    public boolean isNotConnected(){
+    public boolean isNotConnected() {
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo == null || !networkInfo.isConnected();
