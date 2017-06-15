@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import static java.util.Calendar.SECOND;
 
@@ -60,13 +61,13 @@ public class PostCreateActivity extends AppCompatActivity {
     }
 
     private void InsertPost(String body) throws IOException {
-        HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts", new OnTaskCompleted() {
+        HashMap<String, String> payload = new HashMap<>();
+        HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts", payload, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
                 Log.v("JSON Response", object.toString()); // Add to postsAdapter
             }
         });
-        JSONObject JSONResponse = httpRequest.getJSONObject();
 
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 

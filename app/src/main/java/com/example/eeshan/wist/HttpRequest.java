@@ -16,6 +16,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 
 import static android.R.attr.y;
 
@@ -28,9 +29,8 @@ public class HttpRequest {
     private String uri;
     private String body;
     private Context context;
-    private JSONObject response;
 
-    public HttpRequest(Context activity, String verb, String uri, OnTaskCompleted listener) {
+    public HttpRequest(Context activity, String verb, String uri, HashMap<String, String> params, OnTaskCompleted listener) {
         this.verb = verb;
         this.uri = uri;
         this.body = "{ \"body\": \"What I saw today!\" }";
@@ -42,10 +42,6 @@ public class HttpRequest {
 
     private JSONObject parseJSONObject(String result) throws JSONException {
         return new JSONObject(result);
-    }
-
-    public JSONObject getJSONObject() {
-        return this.response;
     }
 
     private class PostAsyncTask extends AsyncTask<Object, Object, JSONObject> {
@@ -68,7 +64,6 @@ public class HttpRequest {
             String jsonResponse = "";
             try {
                 jsonResponse = makeHttpRequest(url);
-                Log.v("JSONResponse", jsonResponse);
             } catch (IOException e) {
                 Log.e("IOException", e.toString());
             }

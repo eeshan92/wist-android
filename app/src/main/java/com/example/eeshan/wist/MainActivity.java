@@ -28,9 +28,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
+    private final int pageSize = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,18 +59,16 @@ public class MainActivity extends AppCompatActivity {
 
         final ListView listView = (ListView) findViewById(R.id.post_list);
 
+        // Posts DB
         WistDbHelper mDbHelper = new WistDbHelper(this);
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
         Cursor cursor = fetchDbPosts(db);
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("limit", String.valueOf(pageSize));
 
-        PostAdapter postsAdapter = updatePostsAdapter(cursor); // Update to handle JSON Array
-
-        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", new OnTaskCompleted() {
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", params, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
-                Log.v("JSON Response", "Task completed!");
-
                 if (object != null) {
                     try {
                         JSONArray postsResponse = object.getJSONArray("posts");
@@ -80,32 +80,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private PostAdapter updatePostsAdapter(Cursor cursor) {
-        ArrayList<Post> posts = new ArrayList<Post>();
-
-        while (cursor.moveToNext()) {
-//            String createdDate = cursor.getString(
-//                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_CREATED_DATE)
-//            );
-
-//            Log.v("Post: ", createdDate);
-            posts.add(0,
-                    new Post(
-                            cursor.getString(
-                                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_BODY)
-                            ),
-                            cursor.getString(
-                                    cursor.getColumnIndexOrThrow(WistContract.PostEntry.COLUMN_NAME_USER_ID)
-                            ),
-                            "5 mins ago"
-                    )
-            );
-        }
-        cursor.close();
-
-        return new PostAdapter(this, posts);
     }
 
     private PostAdapter populatePostsAdapter(JSONArray array) throws JSONException {
