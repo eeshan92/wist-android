@@ -62,8 +62,12 @@ public class PostCreateActivity extends AppCompatActivity {
 
     private void InsertPost(String body) throws IOException {
         HashMap<String, String> payload = new HashMap<>();
-        payload.put("body",body);
-        HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts", payload, new OnTaskCompleted() {
+        SessionManager session = new SessionManager(getApplicationContext());
+        session.checkLogin();
+        HashMap<String, String> user = session.getUserDetails();
+
+        payload.put("body", body);
+        HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts", user, payload, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
                 Log.v("JSON Response", object.toString());
@@ -74,7 +78,7 @@ public class PostCreateActivity extends AppCompatActivity {
 
         ContentValues values = new ContentValues();
         values.put(WistContract.PostEntry.COLUMN_NAME_BODY, body);
-        values.put(WistContract.PostEntry.COLUMN_NAME_USER_ID, "eeshan92");
+        values.put(WistContract.PostEntry.COLUMN_NAME_USER_ID, user.get(SessionManager.KEY_NAME));
         values.put(WistContract.PostEntry.COLUMN_NAME_CREATED_DATE, Calendar.getInstance().get(SECOND));
 
         db.insert(WistContract.PostEntry.TABLE_NAME, null, values);

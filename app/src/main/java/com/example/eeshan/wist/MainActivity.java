@@ -34,13 +34,8 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private final int pageSize = 100;
-    private String username;
-    private String email;
-    private String token;
 
     AlertDialogManager alert = new AlertDialogManager();
-    SessionManager session;
-    Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +51,9 @@ public class MainActivity extends AppCompatActivity {
 //            showAlert("location");
 //        }
 
-        session = new SessionManager(getApplicationContext());
+        SessionManager session = new SessionManager(getApplicationContext());
         session.checkLogin();
         HashMap<String, String> user = session.getUserDetails();
-        this.username = user.get(SessionManager.KEY_NAME);
-        this.email = user.get(SessionManager.KEY_EMAIL);
-        this.token = user.get(SessionManager.KEY_ACCESS_TOKEN);
 
 //        Button btnLogout;
 //        btnLogout = (Button) findViewById(R.id.btnLogout);
@@ -94,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("limit", String.valueOf(pageSize));
 
-        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", params, new OnTaskCompleted() {
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, params, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
                 if (object != null) {

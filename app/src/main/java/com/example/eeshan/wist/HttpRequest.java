@@ -30,13 +30,15 @@ public class HttpRequest {
     private String uri;
     private String body;
     private Context context;
-    private Map<String, String> map;
+    private Map<String, String> params;
+    private Map<String, String> credentials;
 
-    public HttpRequest(Context activity, String verb, String uri, HashMap<String, String> params, OnTaskCompleted listener) {
+    public HttpRequest(Context activity, String verb, String uri, HashMap<String, String> credentials, HashMap<String, String> params, OnTaskCompleted listener) {
         this.verb = verb;
         this.uri = uri;
         this.context = activity;
-        this.map = params;
+        this.params = params;
+        this.credentials = credentials;
 
         PostAsyncTask uploadPost = new PostAsyncTask(listener);
         uploadPost.execute();
@@ -105,14 +107,14 @@ public class HttpRequest {
                 if (verb != "GET") { urlConnection.setDoOutput(true); }
                 urlConnection.setRequestProperty("Content-Type","application/json");
                 urlConnection.setRequestProperty("Accept","application/json");
-                urlConnection.setRequestProperty("X-User-Email", "eeshansim@gmail.com");
-                urlConnection.setRequestProperty("X-User-Token", "jsjVj5pyxYVK3EyUmUrz");
+                urlConnection.setRequestProperty("X-User-Email", credentials.get(SessionManager.KEY_EMAIL));
+                urlConnection.setRequestProperty("X-User-Token", credentials.get(SessionManager.KEY_ACCESS_TOKEN));
                 urlConnection.setReadTimeout(10000);
                 urlConnection.setConnectTimeout(15000);
                 urlConnection.connect();
 
                 if (verb != "GET") {
-                    String payload = new JSONObject(map).toString();
+                    String payload = new JSONObject(params).toString();
                     OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
                     writer.write(payload);
                     writer.close();

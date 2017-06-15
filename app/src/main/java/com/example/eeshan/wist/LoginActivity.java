@@ -40,6 +40,7 @@ public class LoginActivity extends Activity {
                 String password = txtPassword.getText().toString();
 
                 if (username.trim().length() > 0 && password.trim().length() > 0) {
+                    // Make HTTP Request here to verify username password
                     if (username.equals("test") && password.equals("test")) {
                         session.createLoginSession("eeshansim", "eeshansim@gmail.com", "jsjVj5pyxYVK3EyUmUrz");
 
