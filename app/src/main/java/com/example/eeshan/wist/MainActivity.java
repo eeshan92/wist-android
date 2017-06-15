@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInstaller;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
@@ -33,6 +34,13 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private final int pageSize = 100;
+    private String username;
+    private String email;
+    private String token;
+
+    AlertDialogManager alert = new AlertDialogManager();
+    SessionManager session;
+    Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +55,26 @@ public class MainActivity extends AppCompatActivity {
 //        if (isNotLocationEnabled()) {
 //            showAlert("location");
 //        }
+
+        session = new SessionManager(getApplicationContext());
+        session.checkLogin();
+        HashMap<String, String> user = session.getUserDetails();
+        this.username = user.get(SessionManager.KEY_NAME);
+        this.email = user.get(SessionManager.KEY_EMAIL);
+        this.token = user.get(SessionManager.KEY_ACCESS_TOKEN);
+
+//        Button btnLogout;
+//        btnLogout = (Button) findViewById(R.id.btnLogout);
+//        btnLogout.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View arg0) {
+//                // Clear the session data
+//                // This will clear all session data and
+//                // redirect user to LoginActivity
+//                session.logoutUser();
+//            }
+//        });
 
         Button createPostButton = (Button) findViewById(R.id.post_button);
         createPostButton.setOnClickListener(new View.OnClickListener() {
