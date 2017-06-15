@@ -8,6 +8,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 /**
  * Created by eeshan on 15/6/17.
  */
@@ -40,17 +46,28 @@ public class LoginActivity extends Activity {
                 String password = txtPassword.getText().toString();
 
                 if (username.trim().length() > 0 && password.trim().length() > 0) {
-                    // Make HTTP Request here to verify username password
-                    if (username.equals("test") && password.equals("test")) {
-                        session.createLoginSession("eeshansim", "eeshansim@gmail.com", "jsjVj5pyxYVK3EyUmUrz");
-
-                        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(i);
-                        finish();
-
-                    } else {
-                        alert.showAlertDialog(LoginActivity.this, "Login failed..", "Username/Password is incorrect", false);
-                    }
+                    HashMap<String,String> params = new HashMap<String, String>();
+                    params.put("email", username);
+                    params.put("password", password);
+                    HttpRequest httpRequest = new HttpRequest(getApplicationContext(), "GET", "/users/me", null, params, new OnTaskCompleted() {
+                        @Override
+                        public void onTaskCompleted(JSONObject object) {
+                            if (object != null) {
+                                try {
+                                    session.createLoginSession(
+                                            object.getString("username"),
+                                            object.getString("email"),
+                                            object.getString("token"));
+                                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                                    startActivity(i);
+                                    finish();
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                    alert.showAlertDialog(LoginActivity.this, "Login failed..", "Username/Password is incorrect", false);
+                                }
+                            }
+                        }
+                    });
                 } else {
                     alert.showAlertDialog(LoginActivity.this, "Login failed..", "Please enter username and password", false);
                 }

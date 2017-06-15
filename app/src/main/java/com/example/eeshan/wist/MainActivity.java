@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("limit", String.valueOf(pageSize));
 
-        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, params, new OnTaskCompleted() {
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, null, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
                 if (object != null) {

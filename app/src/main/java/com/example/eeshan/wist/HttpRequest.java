@@ -1,8 +1,10 @@
 package com.example.eeshan.wist;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,10 +14,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -107,9 +112,12 @@ public class HttpRequest {
                 if (verb != "GET") { urlConnection.setDoOutput(true); }
                 urlConnection.setRequestProperty("Content-Type","application/json");
                 urlConnection.setRequestProperty("Accept","application/json");
-                urlConnection.setRequestProperty("X-User-Email", credentials.get(SessionManager.KEY_EMAIL));
-                urlConnection.setRequestProperty("X-User-Token", credentials.get(SessionManager.KEY_ACCESS_TOKEN));
-                urlConnection.setReadTimeout(10000);
+                if (credentials != null) {
+                    urlConnection.setRequestProperty("X-User-Email", credentials.get(SessionManager.KEY_EMAIL));
+                    urlConnection.setRequestProperty("X-User-Token", credentials.get(SessionManager.KEY_ACCESS_TOKEN));
+                }
+
+                urlConnection.setReadTimeout(15000);
                 urlConnection.setConnectTimeout(15000);
                 urlConnection.connect();
 
@@ -117,6 +125,15 @@ public class HttpRequest {
                     String payload = new JSONObject(params).toString();
                     OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
                     writer.write(payload);
+                    writer.close();
+                } else if (params != null) {
+                    ContentValues paramsList = new ContentValues();
+                    for (Map.Entry<String, String> entry: params.entrySet()) {
+                        paramsList.put(entry.getKey(), entry.getValue());
+                    }
+                    String queryString =  getQuery(paramsList);
+                    OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
+                    writer.write(queryString);
                     writer.close();
                 }
 
@@ -147,6 +164,25 @@ public class HttpRequest {
                 }
             }
             return output.toString();
+        }
+
+        private String getQuery(ContentValues params) throws UnsupportedEncodingException
+        {
+            StringBuilder result = new StringBuilder();
+            boolean first = true;
+
+            for (Map.Entry<String, Object> pair : params.valueSet()) {
+                if (first) {
+                    first = false;
+                } else {
+                    result.append("&");
+                }
+
+                result.append(URLEncoder.encode(pair.getKey(), "UTF-8"));
+                result.append("=");
+                result.append(URLEncoder.encode(pair.getValue().toString(), "UTF-8"));
+            }
+            return result.toString();
         }
     }
 }
