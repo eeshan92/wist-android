@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<Post> posts = new ArrayList<Post>();
 
         for (int i = 0; i < array.length(); i++) {
-            posts.add(
+            posts.add(0,
                     new Post(
                             array.getJSONObject(i).getString("body"),
                             array.getJSONObject(i).getJSONObject("user").getString("username"),

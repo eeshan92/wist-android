@@ -62,10 +62,11 @@ public class PostCreateActivity extends AppCompatActivity {
 
     private void InsertPost(String body) throws IOException {
         HashMap<String, String> payload = new HashMap<>();
+        payload.put("body",body);
         HttpRequest httpRequest= new HttpRequest(this, "POST", "/posts", payload, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
-                Log.v("JSON Response", object.toString()); // Add to postsAdapter
+                Log.v("JSON Response", object.toString());
             }
         });
 
@@ -84,10 +85,6 @@ public class PostCreateActivity extends AppCompatActivity {
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
         Cursor cursor = db.rawQuery("SELECT * FROM " + WistContract.PostEntry.TABLE_NAME, null);
-        try {
-            Log.v("displayDatabaseInfo", "Database has " + String.valueOf(cursor.getCount()) + " entries");
-        } finally {
-            cursor.close();
-        }
+        cursor.close();
     }
 }

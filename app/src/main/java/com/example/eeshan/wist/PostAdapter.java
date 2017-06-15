@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +42,11 @@ public class PostAdapter extends ArrayAdapter<Post> {
 
         bodyTextView.setText(currentPost.getBody());
         usernameTextView.setText(currentPost.getUsername());
-        createdDateTextView.setText(currentPost.getCreatedDate());
+        try {
+            createdDateTextView.setText(currentPost.getCreatedDate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
 
         if (position % 2 == 1) {
             postListView.setBackgroundColor(Color.parseColor("#E6E9EA"));

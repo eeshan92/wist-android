@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.R.attr.y;
 
@@ -29,12 +30,13 @@ public class HttpRequest {
     private String uri;
     private String body;
     private Context context;
+    private Map<String, String> map;
 
     public HttpRequest(Context activity, String verb, String uri, HashMap<String, String> params, OnTaskCompleted listener) {
         this.verb = verb;
         this.uri = uri;
-        this.body = "{ \"body\": \"What I saw today!\" }";
         this.context = activity;
+        this.map = params;
 
         PostAsyncTask uploadPost = new PostAsyncTask(listener);
         uploadPost.execute();
@@ -110,7 +112,7 @@ public class HttpRequest {
                 urlConnection.connect();
 
                 if (verb != "GET") {
-                    String payload = body;
+                    String payload = new JSONObject(map).toString();
                     OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
                     writer.write(payload);
                     writer.close();
