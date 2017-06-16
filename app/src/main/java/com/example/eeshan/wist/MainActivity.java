@@ -38,6 +38,7 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private final int pageSize = 100;
+    private SessionManager session;
 
     AlertDialogManager alert = new AlertDialogManager();
 
@@ -59,9 +60,11 @@ public class MainActivity extends AppCompatActivity {
 //            showAlert("location");
 //        }
 
-        SessionManager session = new SessionManager(getApplicationContext());
-        session.checkLogin();
-        HashMap<String, String> user = session.getUserDetails();
+        this.session = new SessionManager(getApplicationContext());
+        Boolean isLoggedIn = session.checkLogin();
+
+        if (isLoggedIn) {
+            HashMap<String, String> user = session.getUserDetails();
 
 //        Button btnLogout;
 //        btnLogout = (Button) findViewById(R.id.btnLogout);
@@ -76,50 +79,55 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        Button createPostButton = (Button) findViewById(R.id.post_button);
-        createPostButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, PostCreateActivity.class);
-                startActivity(intent);
-            }
-        });
+            Button createPostButton = (Button) findViewById(R.id.post_button);
+            createPostButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(MainActivity.this, PostCreateActivity.class);
+                    startActivity(intent);
+                }
+            });
 
-        final ListView listView = (ListView) findViewById(R.id.post_list);
+            final ListView listView = (ListView) findViewById(R.id.post_list);
 
-        // Posts DB
-        WistDbHelper mDbHelper = new WistDbHelper(this);
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-        Cursor cursor = fetchDbPosts(db);
-        HashMap<String, String> params = new HashMap<String, String>();
-        params.put("limit", String.valueOf(pageSize));
+            // Posts DB
+            WistDbHelper mDbHelper = new WistDbHelper(this);
+            SQLiteDatabase db = mDbHelper.getReadableDatabase();
+            Cursor cursor = fetchDbPosts(db);
+            HashMap<String, String> params = new HashMap<String, String>();
+            params.put("limit", String.valueOf(pageSize));
 
-        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, null, new OnTaskCompleted() {
-            @Override
-            public void onTaskCompleted(JSONObject object) {
-                if (object != null) {
-                    try {
-                        JSONArray postsResponse = object.getJSONArray("posts");
-                        PostAdapter postsJSONAdapter = populatePostsAdapter(postsResponse);
-                        listView.setAdapter(postsJSONAdapter);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+            HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, null, new OnTaskCompleted() {
+                @Override
+                public void onTaskCompleted(JSONObject object) {
+                    if (object != null) {
+                        try {
+                            JSONArray postsResponse = object.getJSONArray("posts");
+                            PostAdapter postsJSONAdapter = populatePostsAdapter(postsResponse);
+                            listView.setAdapter(postsJSONAdapter);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_settings:
-                // User chose the "Settings" item, show the app settings UI...
+                session.logoutUser();
                 return true;
 
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
