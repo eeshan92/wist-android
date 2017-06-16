@@ -42,14 +42,14 @@ public class LoginActivity extends Activity {
 
             @Override
             public void onClick(View arg0) {
-                String username = txtUsername.getText().toString();
+                String username = txtUsername.getText().toString().toLowerCase();
                 String password = txtPassword.getText().toString();
 
                 if (username.trim().length() > 0 && password.trim().length() > 0) {
                     HashMap<String,String> params = new HashMap<String, String>();
                     params.put("email", username);
                     params.put("password", password);
-                    HttpRequest httpRequest = new HttpRequest(getApplicationContext(), "GET", "/users/me", null, params, new OnTaskCompleted() {
+                    HttpRequest httpRequest = new HttpRequest(getApplicationContext(), "POST", "/users/me", null, params, new OnTaskCompleted() {
                         @Override
                         public void onTaskCompleted(JSONObject object) {
                             if (object != null) {
@@ -65,6 +65,8 @@ public class LoginActivity extends Activity {
                                     e.printStackTrace();
                                     alert.showAlertDialog(LoginActivity.this, "Login failed..", "Username/Password is incorrect", false);
                                 }
+                            } else {
+                                alert.showAlertDialog(LoginActivity.this, "Login failed..", "Username/Password is incorrect", false);
                             }
                         }
                     });

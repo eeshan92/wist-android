@@ -45,14 +45,16 @@ public class SessionManager {
         return user;
     }
 
-    public void checkLogin(){
+    public Boolean checkLogin(){
         if(!this.isLoggedIn()){
             Intent i = new Intent(_context, LoginActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             _context.startActivity(i);
+            return false;
         }
+        return true;
     }
 
     public boolean isLoggedIn(){

@@ -64,8 +64,22 @@ public class HttpRequest {
         protected JSONObject doInBackground(Object... urls) {
             URL url = null;
             String domain = context.getString(R.string.base_url);
+            String queryString = null;
+            if (verb == "GET" && params != null) {
+                ContentValues paramsList = new ContentValues();
+                for (Map.Entry<String, String> entry: params.entrySet()) {
+                    paramsList.put(entry.getKey(), entry.getValue());
+                }
+                try {
+                    queryString =  "?" + getQuery(paramsList);
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (queryString == null) { queryString = ""; }
+
             try {
-                url = new URL(domain + uri);
+                url = new URL(domain + uri + queryString);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
@@ -79,7 +93,8 @@ public class HttpRequest {
 
             JSONObject jsonObjectResponse = null;
             try {
-                jsonObjectResponse = parseJSONObject(jsonResponse);
+                if (jsonResponse != null )
+                    jsonObjectResponse = parseJSONObject(jsonResponse);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -126,17 +141,8 @@ public class HttpRequest {
                     OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
                     writer.write(payload);
                     writer.close();
-                } else if (params != null) {
-                    ContentValues paramsList = new ContentValues();
-                    for (Map.Entry<String, String> entry: params.entrySet()) {
-                        paramsList.put(entry.getKey(), entry.getValue());
-                    }
-                    String queryString =  getQuery(paramsList);
-                    OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream(), "UTF-8");
-                    writer.write(queryString);
-                    writer.close();
                 }
-
+                if (urlConnection.getResponseCode() == 401) { return null; }
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             } catch (IOException e) {
