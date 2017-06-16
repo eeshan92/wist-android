@@ -11,11 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by eeshan on 3/4/17.
@@ -39,6 +42,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
         TextView bodyTextView = (TextView) postListView.findViewById(R.id.body);
         TextView usernameTextView = (TextView) postListView.findViewById(R.id.username);
         TextView createdDateTextView = (TextView) postListView.findViewById(R.id.created_date);
+        ImageView userIcon  = (ImageView) postListView.findViewById(R.id.user_icon);
 
         bodyTextView.setText(currentPost.getBody());
         usernameTextView.setText(currentPost.getUsername());
@@ -53,6 +57,26 @@ public class PostAdapter extends ArrayAdapter<Post> {
         } else {
             postListView.setBackgroundColor(Color.WHITE);
         }
+
+        int icon_id = position%16;
+        HashMap<Integer, Integer> iconMap = new HashMap<Integer, Integer>();
+        iconMap.put(1,R.drawable.antenna);
+        iconMap.put(2,R.drawable.apartment);
+        iconMap.put(3,R.drawable.arch);
+        iconMap.put(4,R.drawable.barrier);
+        iconMap.put(5,R.drawable.car);
+        iconMap.put(6,R.drawable.circus_tent);
+        iconMap.put(7,R.drawable.ferris_wheel);
+        iconMap.put(8,R.drawable.fountain);
+        iconMap.put(9,R.drawable.house);
+        iconMap.put(10,R.drawable.lightbox);
+        iconMap.put(11,R.drawable.school_bus);
+        iconMap.put(12,R.drawable.traffic_light);
+        iconMap.put(13,R.drawable.skyscrapper);
+        iconMap.put(14,R.drawable.subway);
+        iconMap.put(15,R.drawable.carousel);
+        iconMap.put(0,R.drawable.cart);
+        userIcon.setImageResource(iconMap.get(icon_id));
 
         return postListView;
     }
