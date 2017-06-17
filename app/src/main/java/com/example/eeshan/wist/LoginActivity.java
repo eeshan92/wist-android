@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import java.util.HashMap;
 public class LoginActivity extends Activity {
     EditText txtUsername, txtPassword;
     Button btnLogin;
+    Button btnSignUp;
     AlertDialogManager alert = new AlertDialogManager();
 
     SessionManager session;
@@ -73,7 +75,16 @@ public class LoginActivity extends Activity {
                 } else {
                     alert.showAlertDialog(LoginActivity.this, "Login failed..", "Please enter username and password", false);
                 }
+            }
+        });
 
+        btnSignUp = (Button) findViewById(R.id.btnSignUp);
+        btnSignUp.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View arg0) {
+                Intent i = new Intent(getApplicationContext(), SignUpActivity.class);
+                startActivity(i);
             }
         });
     }
