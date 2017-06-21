@@ -1,16 +1,21 @@
 package com.example.eeshan.wist;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -20,10 +25,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.app.AlertDialog.Builder;
+import android.widget.Toast;
 
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
@@ -37,10 +44,32 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
-    private final int pageSize = 100;
+    private final int pageSize = 10;
+    private int nextPage = 1;
     private SessionManager session;
+    private PostAdapter postsAdapter;
+    private HashMap<String, String> user;
+    private boolean requestingData = false;
 
     AlertDialogManager alert = new AlertDialogManager();
+
+    private final LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            final double longitude = location.getLongitude();
+            final double latitude = location.getLatitude();
+            Log.v("onLocationChanged", "Lat: " + String.valueOf(latitude) + ". Lng: " + String.valueOf(longitude));
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        postsAdapter = new PostAdapter(this, new ArrayList<Post>());
 
 //        if (isNotConnected()) {
 //            showAlert("internet");
@@ -64,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         Boolean isLoggedIn = session.checkLogin();
 
         if (isLoggedIn) {
-            HashMap<String, String> user = session.getUserDetails();
+            user = session.getUserDetails();
 
 //        Button btnLogout;
 //        btnLogout = (Button) findViewById(R.id.btnLogout);
@@ -91,25 +121,29 @@ public class MainActivity extends AppCompatActivity {
             final ListView listView = (ListView) findViewById(R.id.post_list);
 
             // Posts DB
-            WistDbHelper mDbHelper = new WistDbHelper(this);
-            SQLiteDatabase db = mDbHelper.getReadableDatabase();
-            Cursor cursor = fetchDbPosts(db);
-            HashMap<String, String> params = new HashMap<String, String>();
-            params.put("limit", String.valueOf(pageSize));
+//            WistDbHelper mDbHelper = new WistDbHelper(this);
+//            SQLiteDatabase db = mDbHelper.getReadableDatabase();
+//            Cursor cursor = fetchDbPosts(db);
 
-            HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, null, new OnTaskCompleted() {
+            getPosts(true);
+            listView.setAdapter(postsAdapter);
+
+            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override
-                public void onTaskCompleted(JSONObject object) {
-                    if (object != null) {
-                        try {
-                            JSONArray postsResponse = object.getJSONArray("posts");
-                            PostAdapter postsJSONAdapter = populatePostsAdapter(postsResponse);
-                            listView.setAdapter(postsJSONAdapter);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                    if (scrollState == SCROLL_STATE_IDLE && !requestingData) {
+                        if ((listView.getLastVisiblePosition() - listView.getHeaderViewsCount() -
+                                listView.getFooterViewsCount()) >= (postsAdapter.getCount() - 1)) {
+                            getPosts(true);
+                        } else if (listView.getFirstVisiblePosition() == 0) {
+                            // handle refresh
+                            // getPosts(false);
                         }
                     }
                 }
+
+                @Override
+                public void onScroll(AbsListView view, int first, int visible, int total) {}
             });
         } else {
             finish();
@@ -128,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_settings:
                 session.logoutUser();
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
 
@@ -136,20 +169,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private PostAdapter populatePostsAdapter(JSONArray array) throws JSONException {
-        ArrayList<Post> posts = new ArrayList<Post>();
-
+    private void populatePostsAdapter(JSONArray array, Boolean toBottom) throws JSONException {
         for (int i = 0; i < array.length(); i++) {
-            posts.add(0,
-                    new Post(
-                            array.getJSONObject(i).getString("body"),
-                            array.getJSONObject(i).getJSONObject("user").getString("username"),
-                            array.getJSONObject(i).getString("created_at")
-                    )
-            );
+            if (toBottom) {
+                postsAdapter.add(new Post(
+                        array.getJSONObject(i).getString("body"),
+                        array.getJSONObject(i).getJSONObject("user").getString("username"),
+                        array.getJSONObject(i).getString("created_at")
+                ));
+            } else {
+                postsAdapter.insert(new Post(
+                        array.getJSONObject(i).getString("body"),
+                        array.getJSONObject(i).getJSONObject("user").getString("username"),
+                        array.getJSONObject(i).getString("created_at")
+                ), 0);
+            }
         }
-
-        return new PostAdapter(this, posts);
     }
 
     private Cursor fetchDbPosts(SQLiteDatabase db) {
@@ -206,7 +241,9 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean isNotLocationEnabled() {
+    private boolean isLocationEnabled() {
+        Log.v("GPS Provider", locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)+"");
+        Log.v("Network Provider", locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)+"");
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
@@ -215,5 +252,51 @@ public class MainActivity extends AppCompatActivity {
         ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         return networkInfo == null || !networkInfo.isConnected();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.v("onPause()", "Activity pausing");
+        locationManager.removeUpdates(locationListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.v("onResume()", "Activity resuming");
+        if (isLocationEnabled()) {
+            locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER, 5 * 1000, 10, locationListener);
+        } else {
+            showAlert("location");
+        }
+    }
+
+    private void getPosts(Boolean toBottom) {
+        final Boolean addToBottom = toBottom;
+
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("per_page", String.valueOf(pageSize));
+        params.put("page", String.valueOf(nextPage));
+
+        requestingData = true; // pause other requests from scrolling
+        HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, params, new OnTaskCompleted() {
+            @Override
+            public void onTaskCompleted(JSONObject object) {
+                if (object != null) {
+                    try {
+                        JSONArray postsResponse = object.getJSONArray("posts");
+                        JSONObject pagination = object.getJSONObject("pagination");
+                        Integer currentPage = pagination.getInt("page");
+                        nextPage = currentPage + 1;
+                        populatePostsAdapter(postsResponse, addToBottom);
+                        requestingData = false; // resume requests from scrolling
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
