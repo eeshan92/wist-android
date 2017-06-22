@@ -40,7 +40,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+
+import static com.example.eeshan.wist.R.layout.post;
 
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
@@ -171,17 +174,20 @@ public class MainActivity extends AppCompatActivity {
 
     private void populatePostsAdapter(JSONArray array, Boolean toBottom) throws JSONException {
         for (int i = 0; i < array.length(); i++) {
+            JSONObject post = array.getJSONObject(i);
             if (toBottom) {
                 postsAdapter.add(new Post(
-                        array.getJSONObject(i).getString("body"),
-                        array.getJSONObject(i).getJSONObject("user").getString("username"),
-                        array.getJSONObject(i).getString("created_at")
+                        post.getString("body"),
+                        post.getJSONObject("user").getString("username"),
+                        post.getString("created_at"),
+                        post.getInt("id")
                 ));
             } else {
                 postsAdapter.insert(new Post(
-                        array.getJSONObject(i).getString("body"),
-                        array.getJSONObject(i).getJSONObject("user").getString("username"),
-                        array.getJSONObject(i).getString("created_at")
+                        post.getString("body"),
+                        post.getJSONObject("user").getString("username"),
+                        post.getString("created_at"),
+                        post.getInt("id")
                 ), 0);
             }
         }
@@ -291,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
                         Integer currentPage = pagination.getInt("page");
                         nextPage = currentPage + 1;
                         populatePostsAdapter(postsResponse, addToBottom);
+                        postsAdapter.sort();
                         requestingData = false; // resume requests from scrolling
                     } catch (JSONException e) {
                         e.printStackTrace();
