@@ -258,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
         final Boolean refreshing = refresh;
         Integer size, firstId, lastId;
         Post firstItem = null;
-        requestingData = true; // pause other requests from scrolling
         swipeRefreshLayout.setRefreshing(true);
 
         HashMap<String, String> params = new HashMap<String, String>();
@@ -296,15 +295,15 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject pagination = object.getJSONObject("pagination");
                         populatePostsAdapter(postsResponse);
 
-                        Integer currentPage = pagination.getInt("page");
-                        Integer lastPage = pagination.getInt("total");
-
-                        if (refreshing && currentPage != lastPage) {
-                            getPostsRequest(refreshing, params, page + 1);
+                        if (refreshing) {
+                            Integer currentPage = pagination.getInt("page");
+                            Integer lastPage = pagination.getInt("total");
+                            if (currentPage != lastPage) {
+                                getPostsRequest(refreshing, params, page + 1);
+                            }
                         }
                         swipeRefreshLayout.setRefreshing(false);
                         postsAdapter.sort();
-                        requestingData = false; // resume requests from scrolling
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

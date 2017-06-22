@@ -45,7 +45,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
         TextView createdDateTextView = (TextView) postListView.findViewById(R.id.created_date);
         ImageView userIcon  = (ImageView) postListView.findViewById(R.id.user_icon);
 
-        bodyTextView.setText(String.valueOf(currentPost.getId()));
+        bodyTextView.setText(currentPost.getBody());
         usernameTextView.setText(currentPost.getUsername());
         try {
             createdDateTextView.setText(currentPost.getCreatedDate());
@@ -81,7 +81,6 @@ public class PostAdapter extends ArrayAdapter<Post> {
 
         return postListView;
     }
-
 
     public void sort() {
         this.sort(new Comparator<Post>() {
