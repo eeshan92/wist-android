@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,5 +80,15 @@ public class PostAdapter extends ArrayAdapter<Post> {
         userIcon.setImageResource(iconMap.get(icon_id));
 
         return postListView;
+    }
+
+
+    public void sort() {
+        this.sort(new Comparator<Post>() {
+            @Override
+            public int compare(Post o1, Post o2) {
+                return o1.getId().compareTo(o2.getId());
+            }
+        });
     }
 }

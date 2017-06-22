@@ -19,16 +19,22 @@ public class Post {
     private String body;
     private String username;
     private String createdDate;
+    private Integer id;
 
-    public Post(String bodyText, String currentUsername, String createdDate) {
+    public Post(String bodyText, String currentUsername, String createdDate, Integer id) {
         this.body = bodyText;
         this.username = currentUsername;
         this.createdDate = createdDate;
+        this.id = id;
     }
+
+    public Integer getId() { return this.id; }
 
     public String getBody() { return this.body; }
 
     public String getUsername() { return this.username; }
+
+    public String getCreatedDateRaw() { return this.createdDate; }
 
     public String getCreatedDate() throws ParseException {
         Date now = new Date();
