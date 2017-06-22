@@ -54,9 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private SessionManager session;
     private PostAdapter postsAdapter;
     private HashMap<String, String> user;
-    private boolean requestingData = false;
     private SwipyRefreshLayout swipeRefreshLayout;
-    private final int pageSize = 10;
+    private final int pageSize = 20;
 
     AlertDialogManager alert = new AlertDialogManager();
 
@@ -147,21 +146,6 @@ public class MainActivity extends AppCompatActivity {
 
             getPosts(false);
             listView.setAdapter(postsAdapter);
-
-//            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-//                @Override
-//                public void onScrollStateChanged(AbsListView view, int scrollState) {
-//                    if (scrollState == SCROLL_STATE_IDLE && !requestingData) {
-//                        if ((listView.getLastVisiblePosition() - listView.getHeaderViewsCount() -
-//                                listView.getFooterViewsCount()) >= (postsAdapter.getCount() - 1)) {
-//
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void onScroll(AbsListView view, int first, int visible, int total) {}
-//            });
         } else {
             finish();
         }
@@ -251,19 +235,6 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean isLocationEnabled() {
-        Log.v("GPS Provider", locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)+"");
-        Log.v("Network Provider", locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)+"");
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    public boolean isNotConnected() {
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        return networkInfo == null || !networkInfo.isConnected();
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -340,5 +311,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private boolean isLocationEnabled() {
+        Log.v("GPS Provider", locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)+"");
+        Log.v("Network Provider", locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)+"");
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+                locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    public boolean isNotConnected() {
+        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        return networkInfo == null || !networkInfo.isConnected();
     }
 }
