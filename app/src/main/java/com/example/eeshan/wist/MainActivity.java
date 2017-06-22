@@ -16,6 +16,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -34,6 +35,8 @@ import android.widget.Toast;
 
 import com.example.eeshan.wist.data.WistContract;
 import com.example.eeshan.wist.data.WistDbHelper;
+import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayout;
+import com.orangegangsters.github.swipyrefreshlayout.library.SwipyRefreshLayoutDirection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,16 +46,17 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 
+import static android.R.attr.direction;
 import static com.example.eeshan.wist.R.layout.post;
 
 public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
-    private final int pageSize = 10;
-    private int nextPage = 1;
     private SessionManager session;
     private PostAdapter postsAdapter;
     private HashMap<String, String> user;
     private boolean requestingData = false;
+    private SwipyRefreshLayout swipeRefreshLayout;
+    private final int pageSize = 10;
 
     AlertDialogManager alert = new AlertDialogManager();
 
@@ -122,32 +126,42 @@ public class MainActivity extends AppCompatActivity {
             });
 
             final ListView listView = (ListView) findViewById(R.id.post_list);
+            swipeRefreshLayout = (SwipyRefreshLayout) findViewById(R.id.swiperefresh);
+            swipeRefreshLayout.setOnRefreshListener(new SwipyRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh(SwipyRefreshLayoutDirection direction) {
+                    Log.d("MainActivity", "Refresh triggered at "
+                            + (direction == SwipyRefreshLayoutDirection.TOP ? "top" : "bottom"));
+                    if (direction == SwipyRefreshLayoutDirection.TOP) {
+                        getPosts(true);
+                    } else {
+                        getPosts(false);
+                    }
+                }
+            });
 
             // Posts DB
 //            WistDbHelper mDbHelper = new WistDbHelper(this);
 //            SQLiteDatabase db = mDbHelper.getReadableDatabase();
 //            Cursor cursor = fetchDbPosts(db);
 
-            getPosts(true);
+            getPosts(false);
             listView.setAdapter(postsAdapter);
 
-            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                    if (scrollState == SCROLL_STATE_IDLE && !requestingData) {
-                        if ((listView.getLastVisiblePosition() - listView.getHeaderViewsCount() -
-                                listView.getFooterViewsCount()) >= (postsAdapter.getCount() - 1)) {
-                            getPosts(true);
-                        } else if (listView.getFirstVisiblePosition() == 0) {
-                            // handle refresh
-                            // getPosts(false);
-                        }
-                    }
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int first, int visible, int total) {}
-            });
+//            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+//                @Override
+//                public void onScrollStateChanged(AbsListView view, int scrollState) {
+//                    if (scrollState == SCROLL_STATE_IDLE && !requestingData) {
+//                        if ((listView.getLastVisiblePosition() - listView.getHeaderViewsCount() -
+//                                listView.getFooterViewsCount()) >= (postsAdapter.getCount() - 1)) {
+//
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                public void onScroll(AbsListView view, int first, int visible, int total) {}
+//            });
         } else {
             finish();
         }
@@ -171,25 +185,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    private void populatePostsAdapter(JSONArray array, Boolean toBottom) throws JSONException {
+    private void populatePostsAdapter(JSONArray array) throws JSONException {
         for (int i = 0; i < array.length(); i++) {
             JSONObject post = array.getJSONObject(i);
-            if (toBottom) {
-                postsAdapter.add(new Post(
-                        post.getString("body"),
-                        post.getJSONObject("user").getString("username"),
-                        post.getString("created_at"),
-                        post.getInt("id")
-                ));
-            } else {
-                postsAdapter.insert(new Post(
-                        post.getString("body"),
-                        post.getJSONObject("user").getString("username"),
-                        post.getString("created_at"),
-                        post.getInt("id")
-                ), 0);
-            }
+            postsAdapter.add(new Post(
+                    post.getString("body"),
+                    post.getJSONObject("user").getString("username"),
+                    post.getString("created_at"),
+                    post.getInt("id")
+            ));
         }
     }
 
@@ -279,14 +283,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getPosts(Boolean toBottom) {
-        final Boolean addToBottom = toBottom;
+    private void getPosts(Boolean refresh) {
+        final Boolean refreshing = refresh;
+        Integer size, firstId, lastId;
+        Post firstItem = null;
+        requestingData = true; // pause other requests from scrolling
+        swipeRefreshLayout.setRefreshing(true);
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("per_page", String.valueOf(pageSize));
-        params.put("page", String.valueOf(nextPage));
 
-        requestingData = true; // pause other requests from scrolling
+        size = postsAdapter.getCount();
+
+        if (size > 0) {
+            if (refreshing) {
+                firstItem = postsAdapter.getItem(0);
+                if (firstItem != null) {
+                    firstId = firstItem.getId();
+                    params.put("after", String.valueOf(firstId));
+                }
+            } else {
+                lastId = postsAdapter.getItem(size - 1).getId();
+                params.put("before", String.valueOf(lastId));
+            }
+        }
+        getPostsRequest(refresh, params, 1);
+    }
+
+    public void getPostsRequest(Boolean refresh, HashMap<String,String> oldParams, Integer nextPage) {
+        final Boolean refreshing = refresh;
+        final Integer page = nextPage;
+        final HashMap<String,String> params = oldParams;
+        params.put("page", String.valueOf(page));
+
         HttpRequest httpRequest = new HttpRequest(this, "GET", "/posts", user, params, new OnTaskCompleted() {
             @Override
             public void onTaskCompleted(JSONObject object) {
@@ -294,9 +323,15 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         JSONArray postsResponse = object.getJSONArray("posts");
                         JSONObject pagination = object.getJSONObject("pagination");
+                        populatePostsAdapter(postsResponse);
+
                         Integer currentPage = pagination.getInt("page");
-                        nextPage = currentPage + 1;
-                        populatePostsAdapter(postsResponse, addToBottom);
+                        Integer lastPage = pagination.getInt("total");
+
+                        if (refreshing && currentPage != lastPage) {
+                            getPostsRequest(refreshing, params, page + 1);
+                        }
+                        swipeRefreshLayout.setRefreshing(false);
                         postsAdapter.sort();
                         requestingData = false; // resume requests from scrolling
                     } catch (JSONException e) {
