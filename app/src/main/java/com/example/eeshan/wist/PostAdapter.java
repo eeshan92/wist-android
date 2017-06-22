@@ -45,7 +45,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
         TextView createdDateTextView = (TextView) postListView.findViewById(R.id.created_date);
         ImageView userIcon  = (ImageView) postListView.findViewById(R.id.user_icon);
 
-        bodyTextView.setText(currentPost.getBody());
+        bodyTextView.setText(String.valueOf(currentPost.getId()));
         usernameTextView.setText(currentPost.getUsername());
         try {
             createdDateTextView.setText(currentPost.getCreatedDate());
@@ -87,7 +87,7 @@ public class PostAdapter extends ArrayAdapter<Post> {
         this.sort(new Comparator<Post>() {
             @Override
             public int compare(Post o1, Post o2) {
-                return o1.getId().compareTo(o2.getId());
+                return o2.getId().compareTo(o1.getId());
             }
         });
     }
