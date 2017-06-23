@@ -96,24 +96,11 @@ public class MainActivity extends AppCompatActivity {
 //            showAlert("location");
 //        }
 
-        this.session = new SessionManager(getApplicationContext());
+        session = new SessionManager(getApplicationContext());
         Boolean isLoggedIn = session.checkLogin();
 
         if (isLoggedIn) {
             user = session.getUserDetails();
-
-//        Button btnLogout;
-//        btnLogout = (Button) findViewById(R.id.btnLogout);
-//        btnLogout.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View arg0) {
-//                // Clear the session data
-//                // This will clear all session data and
-//                // redirect user to LoginActivity
-//                session.logoutUser();
-//            }
-//        });
 
             Button createPostButton = (Button) findViewById(R.id.post_button);
             createPostButton.setOnClickListener(new View.OnClickListener() {
@@ -165,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
@@ -295,12 +281,8 @@ public class MainActivity extends AppCompatActivity {
                         JSONObject pagination = object.getJSONObject("pagination");
                         populatePostsAdapter(postsResponse);
 
-                        if (refreshing) {
-                            Integer currentPage = pagination.getInt("page");
-                            Integer lastPage = pagination.getInt("total");
-                            if (currentPage != lastPage) {
+                        if (refreshing && pagination.getInt("page") != pagination.getInt("total")) {
                                 getPostsRequest(refreshing, params, page + 1);
-                            }
                         }
                         swipeRefreshLayout.setRefreshing(false);
                         postsAdapter.sort();
@@ -313,8 +295,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean isLocationEnabled() {
-        Log.v("GPS Provider", locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)+"");
-        Log.v("Network Provider", locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)+"");
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
                 locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }

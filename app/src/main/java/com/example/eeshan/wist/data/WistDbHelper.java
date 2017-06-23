@@ -13,7 +13,7 @@ import junit.runner.Version;
 
 public class WistDbHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Wist.db";
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
 
     public WistDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -34,6 +34,11 @@ public class WistDbHelper extends SQLiteOpenHelper {
         if (oldVersion < 2) {
             String SQL_UPDATE_WIST_TABLE = "ALTER TABLE " + WistContract.PostEntry.TABLE_NAME
                     + " ADD COLUMN " + WistContract.PostEntry.COLUMN_NAME_CREATED_DATE + " INTEGER;";
+            db.execSQL(SQL_UPDATE_WIST_TABLE);
+        }
+        if (oldVersion < 3) {
+            String SQL_UPDATE_WIST_TABLE = "ALTER TABLE " + WistContract.PostEntry.TABLE_NAME
+                    + " ADD COLUMN " + WistContract.PostEntry.COLUMN_NAME_POST_ID + " INTEGER NOT NULL;";
             db.execSQL(SQL_UPDATE_WIST_TABLE);
         }
     }

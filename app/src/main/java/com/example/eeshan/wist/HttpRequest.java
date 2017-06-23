@@ -38,7 +38,9 @@ public class HttpRequest {
     private Map<String, String> params;
     private Map<String, String> credentials;
 
-    public HttpRequest(Context activity, String verb, String uri, HashMap<String, String> credentials, HashMap<String, String> params, OnTaskCompleted listener) {
+    public HttpRequest(Context activity, String verb, String uri,
+                       HashMap<String, String> credentials, HashMap<String, String> params,
+                       OnTaskCompleted listener) {
         this.verb = verb;
         this.uri = uri;
         this.context = activity;
@@ -65,6 +67,8 @@ public class HttpRequest {
             URL url = null;
             String domain = context.getString(R.string.base_url);
             String queryString = null;
+            String jsonResponse = "";
+
             if (verb == "GET" && params != null) {
                 ContentValues paramsList = new ContentValues();
                 for (Map.Entry<String, String> entry: params.entrySet()) {
@@ -76,6 +80,7 @@ public class HttpRequest {
                     e.printStackTrace();
                 }
             }
+
             if (queryString == null) { queryString = ""; }
 
             try {
@@ -84,7 +89,6 @@ public class HttpRequest {
                 e.printStackTrace();
             }
 
-            String jsonResponse = "";
             try {
                 jsonResponse = makeHttpRequest(url);
             } catch (IOException e) {
@@ -104,17 +108,6 @@ public class HttpRequest {
         @Override
         protected void onPostExecute(JSONObject result) {
             listener.onTaskCompleted(result);
-        }
-
-        private URL createUrl(String stringUrl) {
-            URL url = null;
-            try {
-                url = new URL(stringUrl);
-            } catch (MalformedURLException exception) {
-                Log.e("Error with creating URL", exception.toString());
-                return null;
-            }
-            return url;
         }
 
         private String makeHttpRequest(URL url) throws IOException {
@@ -146,7 +139,7 @@ public class HttpRequest {
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             } catch (IOException e) {
-                Log.e("IOException", e.toString());
+                e.printStackTrace();
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
@@ -172,8 +165,7 @@ public class HttpRequest {
             return output.toString();
         }
 
-        private String getQuery(ContentValues params) throws UnsupportedEncodingException
-        {
+        private String getQuery(ContentValues params) throws UnsupportedEncodingException {
             StringBuilder result = new StringBuilder();
             boolean first = true;
 
