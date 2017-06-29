@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             final double longitude = location.getLongitude();
             final double latitude = location.getLatitude();
             Log.v("onLocationChanged", "Lat: " + String.valueOf(latitude) + ". Lng: " + String.valueOf(longitude));
+            new Track(longitude, latitude, user, getApplicationContext());
         }
 
         @Override

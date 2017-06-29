@@ -80,7 +80,7 @@ public class PostCreateActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                displayDatabaseInfo();
+//                displayDatabaseInfo();
                 returnToMain();
             }
         });
